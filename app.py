@@ -15,9 +15,11 @@ def create_app():
     # Register blueprints
     from routes.auth import auth_blueprint
     from routes.inventory import inventory_blueprint
+    from routes.history import history_blueprint
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(inventory_blueprint)
+    app.register_blueprint(history_blueprint)
 
 
     return app

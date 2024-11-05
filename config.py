@@ -7,6 +7,6 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///inventory.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SESSION_TYPE = 'filesystem'
-    SESSION_COOKIE_SECURE = True  # Only send cookies over HTTPS
-    SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to cookies
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)  # Auto-logout after 30 minutes of inactivity
+    SESSION_COOKIE_SECURE = True 
+    SESSION_COOKIE_HTTPONLY = True  
+    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30) 
