@@ -1,10 +1,9 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, jsonify
+from datetime import datetime
 from model import History
 from utils import db
 
 history_blueprint = Blueprint('history', __name__)
-
-from datetime import datetime
 
 def get_relative_time(timestamp):
     now = datetime.now()
@@ -26,9 +25,17 @@ def get_relative_time(timestamp):
 
 @history_blueprint.route('/history')
 def show_history():
-    history_data = History.query.order_by(History.timestamp.desc()).all()
+    try:
+        history_data = History.query.order_by(History.timestamp.desc()).all()
 
-    for i in history_data:
-        i.relative_time = get_relative_time(i.timestamp)
+        for i in history_data:
+            i.relative_time = get_relative_time(i.timestamp)
 
-    return render_template('history.html', history=history_data)
+        return render_template('history.html', history=history_data)
+    
+    except Exception as e:
+        return jsonify({
+            "status": "failed",
+            "message": f"Error: {e}",
+            "timestamp": datetime.now()
+        }), 500

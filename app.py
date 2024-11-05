@@ -1,18 +1,17 @@
-# app.py
 from flask import Flask
 from config import Config
-from utils import db, bcrypt, session  # Import initialized extensions
+from utils import db, bcrypt, session 
 
 def create_app():
+    #Init Flask
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Initialize extensions with the app instance
     db.init_app(app)
     bcrypt.init_app(app)
     session.init_app(app)
 
-    # Register blueprints
+    #Register routes
     from routes.auth import auth_blueprint
     from routes.inventory import inventory_blueprint
     from routes.history import history_blueprint

@@ -1,4 +1,3 @@
-# utils/logger.py
 from datetime import datetime
 from utils import db
 from model import History

@@ -1,4 +1,3 @@
-# models.py
 from datetime import datetime
 from utils import db, bcrypt
 
@@ -22,6 +21,6 @@ class Inventory(db.Model):
 class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
-    item_id = db.Column(db.Integer, nullable=True)  # Nullable for non-CRUD actions
+    item_id = db.Column(db.Integer, nullable=True)
     action_type = db.Column(db.String(50), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
