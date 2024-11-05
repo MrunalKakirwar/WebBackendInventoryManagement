@@ -38,8 +38,8 @@ This project is a backend implementation of an Inventory Management System using
 
 2. **Set up a virtual environment**:
    ```bash
-   python3 -m venv venv  
-   source venv\Scripts\activate.bat
+   python -m venv venv  
+    venv\Scripts\activate.bat
    ```
 
 3. **Install dependencies**:
@@ -48,14 +48,14 @@ This project is a backend implementation of an Inventory Management System using
     ```
 
 4. **Set up environment variables**:
-    ```bash
+    
    Create a `.env` file with the following content:  
    SECRET_KEY=your_secret_key
-   ```
+  
 
 6. **Run the application**:
     ```bash
-   flask run
+   python app.py
     ```
    The app will be accessible at `http://localhost:5000`.
    
