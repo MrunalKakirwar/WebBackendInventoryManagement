@@ -9,6 +9,7 @@ inventory_blueprint = Blueprint('inventory', __name__)
 def get_current_user_id():
     return session.get('user_id')
 
+
 @inventory_blueprint.route('/inventory', methods=['POST'])
 def create_item():
     try:
@@ -20,8 +21,32 @@ def create_item():
                 "message": "Unauthorized",
                 "timestamp": datetime.utcnow()
             }), 403
+        
 
         data = request.json
+
+        errors = []
+        
+        if 'item_name' not in data or not isinstance(data['item_name'], str) or not (3 <= len(data['item_name']) <= 100):
+            errors.append("Item name must be a string between 3 and 100 characters.")
+
+        if 'description' in data and (not isinstance(data['description'], str) or len(data['description']) > 500):
+            errors.append("Description must be a string up to 500 characters.")
+
+        if 'quantity' not in data or not isinstance((data['quantity']), int) or data['quantity'] < 0:
+            errors.append("Quantity must be a non-negative integer.")
+
+        if 'price' not in data or not (isinstance(data['price'], float) or isinstance(data['price'], float)) or data['price'] < 0:
+            errors.append("Price must be a non-negative number.")
+
+        if errors:
+            return jsonify({
+                "status": "failed",
+                "message": "Validation errors",
+                "errors": errors,
+                "timestamp": datetime.now()
+            }), 400
+        
         new_item = Inventory(
             user_id=user_id,
             item_name=data['item_name'],
@@ -145,6 +170,28 @@ def update_item(item_id):
             }), 404
 
         data = request.json
+        errors = []
+        
+        if 'item_name' in data and not isinstance(data['item_name'], str) or not (3 <= len(data['item_name']) <= 100):
+            errors.append("Item name must be a string between 3 and 100 characters.")
+
+        if 'description' in data and (not isinstance(data['description'], str) or len(data['description']) > 500):
+            errors.append("Description must be a string up to 500 characters.")
+
+        if 'quantity' in data and not isinstance((data['quantity']), int) or data['quantity'] < 0:
+            errors.append("Quantity must be a non-negative integer.")
+
+        if 'price' in data and  not (isinstance(data['price'], float) or isinstance(data['price'], float)) or data['price'] < 0:
+            errors.append("Price must be a non-negative number.")
+
+        if errors:
+            return jsonify({
+                "status": "failed",
+                "message": "Validation errors",
+                "errors": errors,
+                "timestamp": datetime.now()
+            }), 400
+        
         item.item_name = data.get('item_name', item.item_name)
         item.description = data.get('description', item.description)
         item.quantity = data.get('quantity', item.quantity)

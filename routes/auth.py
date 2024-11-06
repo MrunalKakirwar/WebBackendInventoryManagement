@@ -1,3 +1,4 @@
+import re
 from flask import Blueprint, request, jsonify, session
 from datetime import datetime
 from utils import db, bcrypt
@@ -6,17 +7,40 @@ from logger import log_action
 
 auth_blueprint = Blueprint('auth', __name__)
 
+def validate_user_data(data):
+    errors = []
+
+    if 'username' not in data or not isinstance(data['username'], str) or not (3 <= len(data['username']) <= 30):
+        errors.append("Username must be a string between 3 and 30 characters.")
+    elif not re.match(r"^[a-zA-Z0-9_]+$", data['username']):
+        errors.append("Username can only contain letters, numbers, and underscores.")
+
+    email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    if 'email' not in data or not isinstance(data['email'], str) or not re.match(email_regex, data['email']):
+        errors.append("Invalid email format.")
+
+    if 'password' not in data or not isinstance(data['password'], str) or len(data['password']) < 8:
+        errors.append("Password must be at least 8 characters long.")
+    elif not re.search(r"[A-Za-z]", data['password']) or not re.search(r"[0-9]", data['password']):
+        errors.append("Password must contain at least one letter and one number.")
+
+    return errors
+
 @auth_blueprint.route('/register', methods=['POST'])
 def register():
     try:
         data = request.json
+        errors = validate_user_data(data)
         # Error handling
-        if not data or not all(key in data for key in ['username', 'email', 'password']):
+        if not data or not all(key in data for key in ['username', 'email', 'password']) or errors:
             return jsonify({
                 "status": "failed",
-                "message": "Missing required fields: username, email, and password",
+                "message": "Validation errors",
+                "error": errors,
                 "timestamp": datetime.now()
             }), 400
+        
+        
 
         # Error handling
         existing_user = User.query.filter_by(username=data['username']).first()
