@@ -32,7 +32,7 @@ This project is a backend implementation of an Inventory Management System using
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/MrunalKakirwar/WebBackendInventoryManagement.git
-   cd inventory-management-backend
+   cd WebBackendInventoryManagement
    ```
 
 
