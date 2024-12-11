@@ -67,7 +67,8 @@ def fetch_all_inventory_items(user_id):
         db = get_db_connection()
         inventory_collection = db['inventory']
         items = list(inventory_collection.find({"user_id": user_id}))
-        items = [ serialize_item(item) for item in items]
+        if items:
+            items = [ serialize_item(item) for item in items]
         return items
     except Exception as e:
         raise Exception(f"Error fetching all inventory items: {e}")
@@ -82,7 +83,8 @@ def fetch_inventory_item(item_id, user_id):
             return Exception("Invalid item ID format")
 
         item = inventory_collection.find_one({"_id": item_id, "user_id": user_id})
-        item = serialize_item(item)
+        if item:
+            item = serialize_item(item)
         return item
     except Exception as e:
         raise Exception(f"Error fetching inventory item: {e}")
@@ -146,3 +148,13 @@ def log_action(user_id, item_id, action_type):
 
     except Exception as e:
         print(f"Error logging action: {e}")
+
+def get_history():
+    try:
+        db = get_db_connection()
+        history_collection = db['history']
+        
+        history = list(history_collection.find().sort("timestamp", -1))
+        return history
+    except Exception as e:
+        raise Exception(f"Error fetching history: {e}")

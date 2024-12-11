@@ -137,3 +137,17 @@ def log_action(user_id, item_id, action_type):
         connection.close()
     except Exception as e:
         print(f"Error logging action: {e}")
+
+def get_history():
+    try:
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+        
+        cursor.execute("SELECT * FROM history ORDER BY timestamp DESC")
+        history = cursor.fetchall()
+        
+        cursor.close()
+        connection.close()
+        return history
+    except Exception as e:
+        raise Exception(f"Error fetching history: {e}")
