@@ -1,9 +1,8 @@
 import re
 from flask import Blueprint, request, jsonify, session
 from datetime import datetime
-from utils import db, bcrypt
-from model import User
-from logger import log_action
+from mysqldb import get_user_by_username, insert_new_user, log_action
+from werkzeug.security import generate_password_hash, check_password_hash
 
 auth_blueprint = Blueprint('auth', __name__)
 
@@ -31,33 +30,28 @@ def register():
     try:
         data = request.json
         errors = validate_user_data(data)
-        # Error handling
-        if not data or not all(key in data for key in ['username', 'email', 'password']) or errors:
+
+        if errors:
             return jsonify({
                 "status": "failed",
                 "message": "Validation errors",
-                "error": errors,
+                "errors": errors,
                 "timestamp": datetime.now()
             }), 400
-        
-        
 
-        # Error handling
-        existing_user = User.query.filter_by(username=data['username']).first()
+        existing_user = get_user_by_username(data['username'])
+
         if existing_user:
             return jsonify({
                 "status": "failed",
                 "message": "Username already exists",
                 "timestamp": datetime.now()
             }), 400
-        
-        hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
-        new_user = User(username=data['username'], email=data['email'], password_hash=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
 
-        # Log action to the history table
-        log_action(new_user.id, None, "register")
+        hashed_password = generate_password_hash(data['password'])
+        user_id = insert_new_user(data['username'], data['email'], hashed_password)
+
+        log_action(user_id, None, "register")
 
         return jsonify({
             "status": "successful",
@@ -75,18 +69,18 @@ def register():
 def login():
     try:
         data = request.json
-        user = User.query.filter_by(username=data['username']).first()
-        if user and user.check_password(data['password']):
-            session['user_id'] = user.id  # Store user ID in session
-            log_action(user.id, None, "login")  # Log login action
+        user = get_user_by_username(data['username'])
+
+        if user and check_password_hash(user['password_hash'], data['password']):
+            session['user_id'] = user['id']
+            log_action(user['id'], None, "login")
 
             return jsonify({
                 "status": "successful",
                 "message": "Login successful!",
                 "timestamp": datetime.now()
             })
-        
-        # Error handling
+
         return jsonify({
             "status": "failed",
             "message": "Invalid credentials",
@@ -103,8 +97,9 @@ def login():
 def logout():
     try:
         user_id = session.pop('user_id', None)
+
         if user_id:
-            log_action(user_id, None, "logout")  # Log logout action
+            log_action(user_id, None, "logout")
 
         return jsonify({
             "status": "successful",
